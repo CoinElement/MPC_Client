@@ -26,8 +26,8 @@ export default {
   data() {
     return {
       accountName: "",
-      branch: "Branch8000",
-      branchList: ["Branch8000", "Branch9000", "Branch10000"],
+      branch: "branch8000",
+      branchList: ["branch8000", "branch9000", "branch10000", "branch11000", "branch12000"],
       currentBalance: 0,
       newBalance: 0
     };
@@ -68,7 +68,7 @@ export default {
           console.log("UpdateBalance", response);
           this.$notify({
             message: response.data,
-            type: "message"
+            type: "success"
           });
         });
     }

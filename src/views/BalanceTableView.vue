@@ -7,6 +7,14 @@
     <el-table :data="accTable" border>
       <el-table-column prop="accName" label="Account Name" />
       <el-table-column prop="accBal" label="Balance" />
+      <el-table-column label="Operation" width="250">
+        <template slot-scope="scope">
+          <el-button @click="updateTotal(scope)" size="small">Update balance</el-button>
+          <el-button @click="updateTable(scope.row.accName, scope.$index)" size="small"
+            >Get balance</el-button
+          >
+        </template>
+      </el-table-column>
     </el-table>
 
     <el-dialog :visible.sync="show_dialog" title="Choose Accounts">
@@ -41,7 +49,7 @@ export default {
     submitChoice: function() {
       var text = "";
       this.value.forEach(item => {
-        text = text + item;
+        text = text + item + " ";
       });
       this.shownText = text;
       this.getTableData();
@@ -49,19 +57,8 @@ export default {
     },
     getTableData: function() {
       this.accTable = [];
-      var that = this;
       this.value.forEach(val => {
-        this.$axios.post("/get-result", { account: val }).then(response => {
-          var balance = 0;
-          console.log(response);
-          response.data.Items.forEach(item => {
-            balance += item.balance;
-          });
-          that.accTable.push({
-            accName: val,
-            accBal: balance
-          });
-        });
+        this.updateTable(val);
       });
     },
     getAccList: function() {
@@ -69,6 +66,50 @@ export default {
         console.log(response);
         this.accList = response.data;
         this.getTableData();
+      });
+    },
+    updateTotal: function(scope) {
+      console.log("scope", scope);
+      console.log(scope);
+      var account = scope.row.accName;
+      this.$axios
+        .post("put-result", {
+          account: account
+        })
+        .then(response => {
+          if (response.data) {
+            this.$notify({
+              type: "success",
+              message: "Update request submitted"
+            });
+          }
+          /*
+          if (response.data) {
+            this.updateTable(account, scope.$index);
+          }
+          */
+        });
+    },
+    updateTable(account, index) {
+      var that = this;
+      console.log(index);
+      this.$axios.post("/get-result", { account: account }).then(response => {
+        console.log(response);
+        if (index != undefined) {
+          that.accTable[index].accBal = response.data.Items[response.data.Count - 1].total;
+        } else {
+          if (response.data.Count != 0) {
+            that.accTable.push({
+              accName: account,
+              accBal: response.data.Items[response.data.Count - 1].total
+            });
+          } else {
+            that.accTable.push({
+              accName: account,
+              accBal: 0
+            });
+          }
+        }
       });
     }
   },
