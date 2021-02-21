@@ -1,4 +1,4 @@
-# demo
+# MPC_Client
 
 ## Project setup
 ```

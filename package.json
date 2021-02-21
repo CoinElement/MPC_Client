@@ -1,5 +1,5 @@
 {
-  "name": "demo",
+  "name": "mpc",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,16 +8,36 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@vue/eslint-config-prettier": "^6.0.0",
     "core-js": "^3.6.5",
-    "vue": "^2.6.11"
+    "element-ui": "^2.15.0",
+    "eslint-plugin-html": "^6.1.1",
+    "eslint-plugin-prettier": "^3.3.1",
+    "vue": "^2.6.11",
+    "vue-router": "^3.5.1",
+    "vuex": "^3.6.2",
+    "vuex-router-sync": "^5.0.0"
   },
   "devDependencies": {
+    "@vue/cli-plugin-router": "~4.5.0",
+    "@babel/polyfill": "^7.11.5",
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-eslint": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
+    "@vue/eslint-config-airbnb": "^5.0.2",
+    "axios": "^0.18.0",
     "babel-eslint": "^10.1.0",
+    "bootstrap": "^4.5.2",
     "eslint": "^6.7.2",
+    "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-vue": "^6.2.2",
+    "mutationobserver-shim": "^0.3.7",
+    "popper.js": "^1.16.1",
+    "portal-vue": "^2.1.7",
+    "sass": "^1.26.11",
+    "sass-loader": "^10.0.2",
+    "vue-cli-plugin-axios": "~0.0.4",
+    "vue-cli-plugin-bootstrap-vue": "~0.7.0",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {
@@ -27,7 +47,8 @@
     },
     "extends": [
       "plugin:vue/essential",
-      "eslint:recommended"
+      "eslint:recommended",
+      "@vue/airbnb"
     ],
     "parserOptions": {
       "parser": "babel-eslint"
