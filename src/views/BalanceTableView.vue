@@ -4,13 +4,16 @@
       <template slot="prepend">Choose Account:</template>
       <el-button @click="show_dialog = true" slot="append">Choose...</el-button>
     </el-input>
-    <el-table :data="accTable" border>
-      <el-table-column prop="accName" label="Account Name" />
-      <el-table-column prop="accBal" label="Balance" />
-      <el-table-column label="Operation" width="250">
+    <el-table :data="accTable" border height="500">
+      <el-table-column prop="acctname" label="Account Name" width="140" />
+      <el-table-column prop="total_bal" label="Balance" />
+      <el-table-column prop="timestamp" label="Time" width="100" />
+      <el-table-column prop="branches" label="Branch" width="400" />
+
+      <el-table-column label="Operation" width="250" fixed="right">
         <template slot-scope="scope">
           <el-button @click="updateTotal(scope)" size="small">Update balance</el-button>
-          <el-button @click="updateTable(scope.row.accName, scope.$index)" size="small"
+          <el-button @click="updateTable(scope.row.acctname, scope.$index)" size="small"
             >Get balance</el-button
           >
         </template>
@@ -95,14 +98,12 @@ export default {
       console.log(index);
       this.$axios.post("/get-result", { account: account }).then(response => {
         console.log(response);
+        var item = response.data.Items[response.data.Count - 1];
         if (index != undefined) {
-          that.accTable[index].accBal = response.data.Items[response.data.Count - 1].total;
+          that.accTable[index] = item;
         } else {
           if (response.data.Count != 0) {
-            that.accTable.push({
-              accName: account,
-              accBal: response.data.Items[response.data.Count - 1].total
-            });
+            that.accTable.push(item);
           } else {
             that.accTable.push({
               accName: account,
