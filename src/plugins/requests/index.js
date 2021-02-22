@@ -1,6 +1,6 @@
 import Vue from "vue";
 import axios from "axios";
-//import { Notification } from "element-ui";
+import { Notification } from "element-ui";
 
 const request = axios.create({
   baseURL: "https://6wjw3w2zy7.execute-api.us-east-1.amazonaws.com/init"
