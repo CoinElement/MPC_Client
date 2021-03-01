@@ -1,16 +1,17 @@
 <template>
-  <div style="width:600px">
-    <el-input v-model="shownText" placeholder="Please choose the accout you want display" readonly>
-      <template slot="prepend">Choose Account:</template>
-      <el-button @click="show_dialog = true" slot="append">Choose...</el-button>
-    </el-input>
+  <div>
+    <div class="input-warper">
+      <el-input
+        v-model="shownText"
+        placeholder="Please choose the accout you want display"
+        readonly
+      >
+        <template slot="prepend">Choose Account:</template>
+        <el-button @click="show_dialog = true" slot="append">Choose...</el-button>
+      </el-input>
+    </div>
     <el-table :data="accTable" border height="500">
-      <el-table-column prop="acctname" label="Account Name" width="140" />
-      <el-table-column prop="total_bal" label="Balance" />
-      <el-table-column prop="timestamp" label="Time" width="100" />
-      <el-table-column prop="branches" label="Branch" width="400" />
-
-      <el-table-column label="Operation" width="250" fixed="right">
+      <el-table-column label="Operation" width="250">
         <template slot-scope="scope">
           <el-button @click="updateTotal(scope)" size="small">Update balance</el-button>
           <el-button @click="updateTable(scope.row.acctname, scope.$index)" size="small"
@@ -18,6 +19,22 @@
           >
         </template>
       </el-table-column>
+
+      <el-table-column label="Account Name" width="140">
+        <template slot-scope="scope">
+          <el-link
+            type="primary"
+            @click="showDetail(scope.row.acctname, scope.$index)"
+            :underline="false"
+          >
+            {{ scope.row.acctname }}
+          </el-link>
+        </template>
+      </el-table-column>
+
+      <el-table-column prop="total_bal" label="Balance" />
+      <el-table-column prop="branches" label="Branch" width="400" />
+      <el-table-column prop="timestamp" label="Time" width="200" />
     </el-table>
 
     <el-dialog :visible.sync="show_dialog" title="Choose Accounts">
@@ -52,7 +69,7 @@ export default {
     submitChoice: function() {
       var text = "";
       this.value.forEach(item => {
-        text = text + item + " ";
+        text = text + item + ",";
       });
       this.shownText = text;
       this.getTableData();
@@ -65,15 +82,15 @@ export default {
       });
     },
     getAccList: function() {
+      // 获取账户列表
       this.$axios.get("s3").then(response => {
-        console.log(response);
+        console.log("getAccountList", response.data);
         this.accList = response.data;
         this.getTableData();
       });
     },
     updateTotal: function(scope) {
-      console.log("scope", scope);
-      console.log(scope);
+      // 请求服务器更新账户的数据
       var account = scope.row.accName;
       this.$axios
         .post("put-result", {
@@ -86,31 +103,33 @@ export default {
               message: "Update request submitted"
             });
           }
-          /*
-          if (response.data) {
-            this.updateTable(account, scope.$index);
-          }
-          */
         });
     },
     updateTable(account, index) {
+      // 更新列表信息
       var that = this;
-      console.log(index);
       this.$axios.post("/get-result", { account: account }).then(response => {
-        console.log(response);
-        var item = response.data.Items[response.data.Count - 1];
+        console.log("updateTable", response.data);
+        var dataCount = response.data.length;
+        var item = response.data[dataCount - 1];
         if (index != undefined) {
           that.accTable[index] = item;
         } else {
-          if (response.data.Count != 0) {
+          if (dataCount != 0) {
             that.accTable.push(item);
           } else {
             that.accTable.push({
-              accName: account,
-              accBal: 0
+              acctname: account,
+              total_bal: 0
             });
           }
         }
+      });
+    },
+    showDetail(accountName, index) {
+      console.log("ShowDetail", accountName, index);
+      this.$router.push({
+        path: `account/${accountName}`
       });
     }
   },
@@ -123,5 +142,8 @@ export default {
 <style>
 .el-checkbox__input {
   left: 8px;
+}
+.input-warper {
+  margin: 5px;
 }
 </style>

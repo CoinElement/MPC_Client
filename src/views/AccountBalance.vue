@@ -2,7 +2,7 @@
   <el-card style="width:600px">
     <el-form>
       <el-form-item label="Account Name:">
-        <el-input v-model="accountName" disabled> </el-input>
+        <el-input v-model="accountName" readonly> </el-input>
       </el-form-item>
       <el-form-item label="Balance:">
         <el-select v-model="branch" :span="11">
@@ -50,11 +50,19 @@ export default {
   methods: {
     getCurrentData: function() {
       console.log("Getting current balance");
+      this.currentBalance = "Loading......";
       this.$axios
         .post("/get-postgres", { account: this.accountName, branch: this.branch })
         .then(response => {
-          console.log(response);
-          this.currentBalance = response.data["balance"];
+          console.log("GetCurrentBalance", response);
+          if (response.data) {
+            this.currentBalance = response.data["balance"];
+          } else {
+            this.currentBalance = 0;
+          }
+        })
+        .catch(() => {
+          this.currentBalance = "Wrong.";
         });
     },
     updateBalance: function() {
