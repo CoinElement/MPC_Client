@@ -17,11 +17,14 @@
       v-loading="tableUpdating"
       element-loading-text="Loading..."
     >
-      <el-table-column label="Operation" width="120">
+      <el-table-column label="Operation" width="200">
         <template slot-scope="scope">
-          <el-button @click="updateTable(scope.row.acctname, scope.$index)" size="small"
-            >Get balance</el-button
-          >
+          <el-button @click="updateTable(scope.row.acctname, scope.$index)" size="small">
+            Get balance
+          </el-button>
+          <el-button @click="showHistory(scope.row.acctname)" size="small">
+            History
+          </el-button>
         </template>
       </el-table-column>
 
@@ -55,11 +58,14 @@
         <el-button @click="submitChoice" type="primary">Confirm</el-button>
       </span>
     </el-dialog>
+    <HistoryDialog :visible.sync="historyShow" :account="historyAcct" />
   </div>
 </template>
 
 <script>
+import HistoryDialog from "@/components/HistoryDialog.vue";
 export default {
+  components: { HistoryDialog },
   data() {
     return {
       show_dialog: false,
@@ -67,7 +73,9 @@ export default {
       value: [],
       shownText: "",
       accTable: [],
-      tableUpdating: false
+      tableUpdating: false,
+      historyShow: false,
+      historyAcct: ""
     };
   },
   methods: {
@@ -123,6 +131,10 @@ export default {
       this.$router.push({
         path: `account/${accountName}`
       });
+    },
+    showHistory(accountName) {
+      this.historyShow = true;
+      this.historyAcct = accountName;
     }
   },
   created: function() {
