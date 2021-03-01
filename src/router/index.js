@@ -11,7 +11,8 @@ const routes = [
   {
     path: "/balance",
     name: "Balance",
-    component: BalanceTableView
+    component: BalanceTableView,
+    alias: "/"
   },
   {
     path: "/account",
@@ -26,11 +27,8 @@ const routes = [
   {
     name: "404",
     path: "/404",
-    component: () => import("@/views/NotFound")
-  },
-  {
-    path: "*",
-    redirect: "/404"
+    component: () => import("@/views/NotFound"),
+    alias: "*"
   }
 ];
 
