@@ -16,7 +16,9 @@
           active-text-color="#ffd04b"
         >
           <el-menu-item :route="{ path: '/balance' }" index="Balance">Table</el-menu-item>
-          <el-menu-item :route="{ path: '/account' }" index="Account">Account</el-menu-item>
+          <el-menu-item :route="{ path: '/account' }" index="AccountList"
+            >Account list</el-menu-item
+          >
         </el-menu>
       </el-col>
       <el-col :span="4"> </el-col>

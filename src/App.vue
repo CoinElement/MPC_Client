@@ -53,5 +53,6 @@ export default {
   padding: 7px;
   border: solid 1px #e6e6e6;
   background: whitesmoke;
+  margin: auto;
 }
 </style>

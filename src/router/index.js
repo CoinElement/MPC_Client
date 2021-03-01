@@ -3,6 +3,7 @@ import VueRouter from "vue-router";
 
 import BalanceTableView from "@/views/BalanceTableView";
 import AccountBalance from "@/views/AccountBalance";
+import AccountList from "@/views/AccountList";
 
 Vue.use(VueRouter);
 
@@ -13,9 +14,23 @@ const routes = [
     component: BalanceTableView
   },
   {
+    path: "/account",
+    name: "AccountList",
+    component: AccountList
+  },
+  {
     path: "/account/:accName",
     name: "Account",
     component: AccountBalance
+  },
+  {
+    name: "404",
+    path: "/404",
+    component: () => import("@/views/NotFound")
+  },
+  {
+    path: "*",
+    redirect: "/404"
   }
 ];
 

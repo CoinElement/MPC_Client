@@ -6,33 +6,37 @@
         placeholder="Please choose the accout you want display"
         readonly
       >
-        <template slot="prepend">Choose Account:</template>
+        <template slot="prepend">Choose Accounts:</template>
         <el-button @click="show_dialog = true" slot="append">Choose...</el-button>
       </el-input>
     </div>
-    <el-table :data="accTable" border height="500">
-      <el-table-column label="Operation" width="250">
+    <el-table
+      :data="accTable"
+      border
+      height="500"
+      v-loading="tableUpdating"
+      element-loading-text="Loading..."
+    >
+      <el-table-column label="Operation" width="120">
         <template slot-scope="scope">
-          <el-button @click="updateTotal(scope)" size="small">Update balance</el-button>
           <el-button @click="updateTable(scope.row.acctname, scope.$index)" size="small"
             >Get balance</el-button
           >
         </template>
       </el-table-column>
 
-      <el-table-column label="Account Name" width="140">
+      <el-table-column prop="acctname" label="Account Name" width="140"> </el-table-column>
+      <el-table-column prop="total_bal" label="Balance" width="100">
         <template slot-scope="scope">
           <el-link
             type="primary"
-            @click="showDetail(scope.row.acctname, scope.$index)"
+            @click="showBalanceView(scope.row.acctname, scope.$index)"
             :underline="false"
           >
-            {{ scope.row.acctname }}
+            {{ scope.row.total_bal }}
           </el-link>
         </template>
       </el-table-column>
-
-      <el-table-column prop="total_bal" label="Balance" />
       <el-table-column prop="branches" label="Branch" width="400" />
       <el-table-column prop="timestamp" label="Time" width="200" />
     </el-table>
@@ -62,7 +66,8 @@ export default {
       accList: [],
       value: [],
       shownText: "",
-      accTable: []
+      accTable: [],
+      tableUpdating: false
     };
   },
   methods: {
@@ -89,33 +94,19 @@ export default {
         this.getTableData();
       });
     },
-    updateTotal: function(scope) {
-      // 请求服务器更新账户的数据
-      var account = scope.row.accName;
-      this.$axios
-        .post("put-result", {
-          account: account
-        })
-        .then(response => {
-          if (response.data) {
-            this.$notify({
-              type: "success",
-              message: "Update request submitted"
-            });
-          }
-        });
-    },
     updateTable(account, index) {
       // 更新列表信息
+      sessionStorage.accList = this.accList;
+      sessionStorage.value = this.value;
+      this.tableUpdating = true;
       var that = this;
       this.$axios.post("/get-result", { account: account }).then(response => {
         console.log("updateTable", response.data);
-        var dataCount = response.data.length;
-        var item = response.data[dataCount - 1];
+        var item = response.data[0];
         if (index != undefined) {
           that.accTable[index] = item;
         } else {
-          if (dataCount != 0) {
+          if (item) {
             that.accTable.push(item);
           } else {
             that.accTable.push({
@@ -124,9 +115,10 @@ export default {
             });
           }
         }
+        this.tableUpdating = false;
       });
     },
-    showDetail(accountName, index) {
+    showBalanceView(accountName, index) {
       console.log("ShowDetail", accountName, index);
       this.$router.push({
         path: `account/${accountName}`

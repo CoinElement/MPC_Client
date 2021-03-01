@@ -15,7 +15,7 @@
         <el-input v-model="newBalance"> </el-input>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="updateBalance">Update</el-button>
+        <el-button type="primary" @click="updateBalance" :loading="updating">Update</el-button>
       </el-form-item>
     </el-form>
   </el-card>
@@ -29,7 +29,8 @@ export default {
       branch: "branch8000",
       branchList: ["branch8000", "branch9000", "branch10000", "branch11000", "branch12000"],
       currentBalance: 0,
-      newBalance: 0
+      newBalance: 0,
+      updating: false
     };
   },
   watch: {
@@ -66,6 +67,7 @@ export default {
         });
     },
     updateBalance: function() {
+      this.updating = true;
       this.$axios
         .post("/put-postgres", {
           account: this.accountName,
@@ -78,6 +80,7 @@ export default {
             message: response.data,
             type: "success"
           });
+          this.updating = false;
         });
     }
   }
