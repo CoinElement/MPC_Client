@@ -25,6 +25,11 @@
           <el-button @click="showHistory(scope.row.acctname)" size="small">
             History
           </el-button>
+          <!--
+          <el-button @click="requestUpdate(scope.row.acctname)" size="small">
+            Request update
+          </el-button>
+          -->
         </template>
       </el-table-column>
 
@@ -108,6 +113,9 @@ export default {
       sessionStorage.value = this.value;
       this.tableUpdating = true;
       var that = this;
+      if (index != undefined) {
+        this.requestUpdate(account);
+      }
       this.$axios.post("/get-result", { account: account }).then(response => {
         console.log("updateTable", response.data);
         var item = response.data[0];
@@ -125,6 +133,23 @@ export default {
         }
         this.tableUpdating = false;
       });
+    },
+    requestUpdate(accountName) {
+      this.$notify({
+        type: "info",
+        message: "Requesting"
+      });
+      this.$axios
+        .post("/update-result", {
+          account: accountName
+        })
+        .then(response => {
+          console.log("RequestUpdate", response.data);
+          this.$notify({
+            type: "success",
+            message: "Request Success"
+          });
+        });
     },
     showBalanceView(accountName, index) {
       console.log("ShowDetail", accountName, index);
