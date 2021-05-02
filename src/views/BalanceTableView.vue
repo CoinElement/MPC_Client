@@ -17,11 +17,14 @@
       v-loading="tableUpdating"
       element-loading-text="Loading..."
     >
-      <el-table-column label="Operation" width="200">
+      <el-table-column label="Operation" width="220">
         <template slot-scope="scope">
-          <el-button @click="updateTable(scope.row.acctname, scope.$index)" size="small">
-            Get balance
-          </el-button>
+          <IntervalButton
+            :content="scope.row.isUpdating ? 'display' : 'update'"
+            :interval="5"
+            :locked="!scope.row.isUpdating"
+            @click="handleAccountClick(scope.$index)"
+          />
           <el-button @click="showHistory(scope.row.acctname)" size="small">
             History
           </el-button>
@@ -45,13 +48,13 @@
           </el-link>
         </template>
       </el-table-column>
-      <el-table-column prop="branches" label="Branch" width="400" />
       <el-table-column prop="timestamp" label="Time" width="200" />
+      <el-table-column prop="branches" label="Branch" width="400" />
     </el-table>
 
     <el-dialog :visible.sync="show_dialog" title="Choose Accounts">
       <el-transfer
-        v-model="value"
+        v-model="selectedAccounts"
         :data="accList"
         :titles="['Unselected', 'Selected']"
         :props="{ label: 'name', key: 'name' }"
@@ -69,13 +72,15 @@
 
 <script>
 import HistoryDialog from "@/components/HistoryDialog.vue";
+import IntervalButton from "@/components/IntervalButton.vue";
+
 export default {
-  components: { HistoryDialog },
+  components: { HistoryDialog, IntervalButton },
   data() {
     return {
       show_dialog: false,
-      accList: [],
-      value: [],
+      accList: [], // 账户列表
+      selectedAccounts: [],
       shownText: "",
       accTable: [],
       tableUpdating: false,
@@ -84,57 +89,64 @@ export default {
     };
   },
   methods: {
-    submitChoice: function() {
+    submitChoice() {
       var text = "";
-      this.value.forEach(item => {
+      this.selectedAccounts.forEach(item => {
         text = text + item + ",";
       });
       this.shownText = text;
-      this.getTableData();
+      this.updateFullTable();
       this.show_dialog = false;
     },
-    getTableData: function() {
-      this.accTable = [];
-      this.value.forEach(val => {
-        this.updateTable(val);
-      });
-    },
-    getAccList: function() {
-      // 获取账户列表
+    /**
+     * @description 获取账户列表
+     */
+    getAccList() {
       this.$axios.get("s3").then(response => {
         console.log("getAccountList", response.data);
         this.accList = response.data;
-        this.getTableData();
       });
     },
-    updateTable(account, index) {
-      // 更新列表信息
-      sessionStorage.accList = this.accList;
-      sessionStorage.value = this.value;
+    /**
+     * @description 更新整个表格
+     */
+    updateFullTable() {
       this.tableUpdating = true;
-      var that = this;
-      if (index != undefined) {
-        this.requestUpdate(account);
-      }
-      this.$axios.post("/get-result", { account: account }).then(response => {
+      this.accTable = [];
+      this.selectedAccounts.forEach(value => {
+        this.refreshBalance(value);
+      });
+    },
+    /**
+     * @description 更新账户的存款
+     * @param {accountName} 账户的名称
+     * @param {index} 在列表里的下标
+     */
+    refreshBalance(accountName, index) {
+      this.$axios.post("/get-result", { account: accountName }).then(response => {
         console.log("updateTable", response.data);
         var item = response.data[0];
+        var newItem = {
+          acctname: item ? item.acctname : accountName,
+          total_bal: item ? item.total_bal : 0,
+          isUpdating: false,
+          timestamp: item ? item.timestamp : "",
+          branches: item ? item.branches : ""
+        };
         if (index != undefined) {
-          that.accTable[index] = item;
+          this.$set(this.accTable, index, newItem);
         } else {
-          if (item) {
-            that.accTable.push(item);
-          } else {
-            that.accTable.push({
-              acctname: account,
-              total_bal: 0
-            });
-          }
+          this.accTable.push(newItem);
         }
         this.tableUpdating = false;
       });
     },
-    requestUpdate(accountName) {
+    /**
+     * @description 请求后端更新存款
+     */
+    requestUpdate(accountName, index) {
+      this.accTable[index].isUpdating = true;
+      // 请求后端进行更新数据库
       this.$notify({
         type: "info",
         message: "Requesting"
@@ -156,6 +168,16 @@ export default {
       this.$router.push({
         path: `account/${accountName}`
       });
+    },
+    handleAccountClick(index) {
+      let accountName = this.accTable[index].acctname;
+      if (this.accTable[index].isUpdating) {
+        console.log("display");
+        this.refreshBalance(accountName, index);
+      } else {
+        console.log("update");
+        this.requestUpdate(accountName, index);
+      }
     },
     showHistory(accountName) {
       this.historyShow = true;
